@@ -84,7 +84,8 @@ def crop_svg_attr(svg_attributes, croppath):
     orig_width, width_unit = dim_str2num(svg_attributes['width'])
     new_height = orig_height*((cbbox[3]-cbbox[2])/(orig_vbox[3]-orig_vbox[1]))
     new_width = orig_width*((cbbox[1]-cbbox[0])/(orig_vbox[2]-orig_vbox[0]))
-    new_viewbox = '{} {} {} {}'.format(cbbox[0], cbbox[2], cbbox[1], cbbox[3])
+    #new_viewbox = '{} {} {} {}'.format(cbbox[0], cbbox[2], cbbox[1], cbbox[3])
+    new_viewbox = '{} {} {} {}'.format(cbbox[0], cbbox[2], cbbox[1] - cbbox[0], cbbox[3] - cbbox[2])
     new_svg_attributes = svg_attributes.copy()
     new_svg_attributes['viewBox'] = new_viewbox
     new_svg_attributes['height'] = dim_num2str(new_height, height_unit)
@@ -122,7 +123,7 @@ def crop_svg(file, croppath):
                 for start, stop in zip(start_points, end_points):
                     try:
                         brokenpath.append(path.cropped(start, stop))
-                    except ValueError:
+                    except:
                         brokenpath_failures += 1
                 for broken in brokenpath:
                     if broken.is_contained_by(croppath):
