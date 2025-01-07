@@ -4,7 +4,17 @@ import math
 #functions
 
 #function that takes an SVG file and returns the width and height of the SVG
+#add comments and docstring
 def get_svg_dimensions(svg_file):
+    """
+    Takes an SVG file and returns the width and height of the SVG.
+
+    Args:
+        svg_file (str): The path to the SVG file.
+
+    Returns:
+        tuple: A tuple containing the width and height of the SVG as strings.
+    """
     #open the SVG file
     with open(svg_file, 'r') as file:
         svg = file.read()
@@ -20,8 +30,15 @@ def get_svg_dimensions(svg_file):
     return width, height
 
 def rect2path(rect):
-    #rect is tuple (x, y, width, length)
-    #rewrite using polygon()
+    """
+    Converts a rectangle to an SVG path.
+
+    Args:
+        rect (tuple): A tuple containing the x, y, width, and height of the rectangle.
+
+    Returns:
+        spt.Path: An SVG path representing the rectangle.
+    """
     coords = [(rect[0], rect[1]), (rect[0], rect[1]+rect[3]), (rect[0]+rect[2], rect[1]+rect[3]),
               (rect[0]+rect[2], rect[1])]
     lines = []
@@ -29,7 +46,17 @@ def rect2path(rect):
         lines.append(spt.Line(complex(*coords[i-1]), complex(*point)))
     return spt.Path(*lines)
 
+def poly2path(poly):
+    # TODO: use spt.polygon() instead
+    pass
+
 def path2attr(rect_path):
+    """
+    Converts an SVG path to a dictionary of attributes.
+    Args: 
+        rect_path (spt.Path): An SVG path representing a rectangle.
+    Returns:
+        dict: A dictionary of attributes for the SVG path."""
     new_att = {}
     new_att['d'] = rect_path.d()
     new_att['fill'] = 'none'
@@ -37,6 +64,14 @@ def path2attr(rect_path):
     return new_att
 
 def visualize_crop(file, crop_rect):
+    """
+    Visualizes a crop rectangle on an SVG file.
+    Args:
+        file (str): The path to the SVG file.
+        crop_rect (tuple): A tuple containing the x, y, width, and height of the crop rectangle.
+    Returns:
+        str: The path to the SVG file with the crop rectangle visualized.
+    """
     crop_path = rect2path(crop_rect)
     new_attr = path2attr(crop_path)
     #rebuild SVG with red box
@@ -50,6 +85,14 @@ def visualize_crop(file, crop_rect):
 #function that takes two bounding boxes and determines if the two boxes cover any of the same area. 
 #box1 and box2 are lists with the format [xmin, xmax, ymin, ymax]
 def boxes_overlap(box1, box2):
+    """
+    Determines if two bounding boxes overlap.
+    Args:
+        box1 (list): A list containing the x-min, x-max, y-min, and y-max of the first bounding box.
+        box2 (list): A list containing the x-min, x-max, y-min, and y-max of the second bounding box.
+    Returns:
+        bool: True if the bounding boxes overlap, False otherwise.
+        """
     #check if the boxes overlap in the x direction
     if box1[0] < box2[1] and box1[1] > box2[0]:
         #check if the boxes overlap in the y direction
@@ -59,6 +102,13 @@ def boxes_overlap(box1, box2):
 
     
 def dim_str2num(s):
+    """
+    Converts a string representing a dimension to a number.
+    Args:
+        s (str): A string representing a dimension.
+    Returns:
+        tuple: A tuple containing the dimension as a number and the unit as a string.
+        """
     try:
         float(s)
         return float(s), None
@@ -66,6 +116,13 @@ def dim_str2num(s):
         return float(s[:-2]), s[-2:]
 
 def dim_num2str(dim, unit):
+    """
+    Converts a number and unit to a string.
+    Args:
+        dim (float): The dimension as a number.
+        unit (str): The unit as a string.  Can be 'cm', 'in', 'mm', or 'px'.
+    Returns:
+        str: A string representing the dimension."""
     if unit == None:
         return "{}".format(math.floor(dim))
     if unit in ['cm', 'in', 'mm']:
@@ -77,6 +134,14 @@ def dim_num2str(dim, unit):
 
 #resize SVG height and width to match cropped size
 def crop_svg_attr(svg_attributes, croppath):
+    """
+    Resizes the height and width of an SVG to match the cropped size.
+    Args:
+        svg_attributes (dict): A dictionary of attributes for the SVG.
+        croppath (spt.Path): An SVG path representing the crop rectangle.
+    Returns:
+        dict: A dictionary of attributes for the resized SVG.
+    """
     #height and width dimensions are recognized as cm, mm, in, em, ex, pt, pc, and px
     cbbox = croppath.bbox() #[xmin, xmax, ymin, ymax]
     orig_vbox = [float(x) for x in svg_attributes['viewBox'].split(' ')] #[xmin, ymin, xmax, ymax]
@@ -95,6 +160,14 @@ def crop_svg_attr(svg_attributes, croppath):
 
 
 def crop_svg(file, croppath):
+    """
+    Crops an SVG file to a specified path.
+    Args:
+        file (str): The path to the SVG file.
+        croppath (spt.Path): An SVG path representing the crop rectangle.
+    Returns:
+        tuple: A tuple containing the cropped paths, attributes, and SVG attributes.
+    """
     #returns list of paths, attributes, and svg_attributes from the original file cropped to within the croppath
     paths, attributes, svg_attributes = spt.svg2paths2(file)
     tol = 0.0002
